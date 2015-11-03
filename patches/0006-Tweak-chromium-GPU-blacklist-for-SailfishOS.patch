@@ -1,0 +1,81 @@
+From caff3c817e85460affb1ea4625cbd7022f6e8217 Mon Sep 17 00:00:00 2001
+From: Piotr Tworek <tworaz666@gmail.com>
+Date: Mon, 17 Aug 2015 10:52:24 +0200
+Subject: [PATCH 6/7] Tweak chromium GPU blacklist for SailfishOS.
+
+Signed-off-by: Piotr Tworek <tworaz666@gmail.com>
+---
+ gpu/command_buffer/client/cmd_buffer_helper.h | 2 +-
+ gpu/config/gpu_control_list.cc                | 8 +++++++-
+ gpu/config/software_rendering_list_json.cc    | 2 ++
+ 3 files changed, 10 insertions(+), 2 deletions(-)
+
+diff --git a/gpu/command_buffer/client/cmd_buffer_helper.h b/gpu/command_buffer/client/cmd_buffer_helper.h
+index 8739316..20a2436 100644
+--- a/gpu/command_buffer/client/cmd_buffer_helper.h
++++ b/gpu/command_buffer/client/cmd_buffer_helper.h
+@@ -24,7 +24,7 @@ namespace gpu {
+ 
+ class Buffer;
+ 
+-#if !defined(OS_ANDROID)
++#if !defined(OS_ANDROID) && !defined(OS_SAILFISH)
+ #define CMD_HELPER_PERIODIC_FLUSH_CHECK
+ const int kCommandsPerFlushCheck = 100;
+ const int kPeriodicFlushDelayInMicroseconds =
+diff --git a/gpu/config/gpu_control_list.cc b/gpu/config/gpu_control_list.cc
+index 2e44e3d..026821b 100644
+--- a/gpu/config/gpu_control_list.cc
++++ b/gpu/config/gpu_control_list.cc
+@@ -256,6 +256,10 @@ GpuControlList::OsType GpuControlList::OsInfo::type() const {
+ 
+ GpuControlList::OsType GpuControlList::OsInfo::StringToOsType(
+     const std::string& os) {
++#if defined(OS_SAILFISH)
++  if (os == "linux")
++    return kOsAndroid;
++#endif
+   if (os == "win")
+     return kOsWin;
+   else if (os == "macosx")
+@@ -1105,6 +1109,8 @@ GpuControlList::GpuControlListEntry::GLType
+ GpuControlList::GpuControlListEntry::GetDefaultGLType() {
+ #if defined(OS_CHROMEOS)
+   return kGLTypeGL;
++#elif defined(OS_SAILFISH)
++  return kGLTypeGLES;
+ #elif defined(OS_LINUX) || defined(OS_OPENBSD)
+   return kGLTypeGL;
+ #elif defined(OS_MACOSX)
+@@ -1539,7 +1545,7 @@ GpuControlList::OsType GpuControlList::GetOsType() {
+   return kOsChromeOS;
+ #elif defined(OS_WIN)
+   return kOsWin;
+-#elif defined(OS_ANDROID)
++#elif defined(OS_ANDROID) || defined(OS_SAILFISH)
+   return kOsAndroid;
+ #elif defined(OS_LINUX) || defined(OS_OPENBSD)
+   return kOsLinux;
+diff --git a/gpu/config/software_rendering_list_json.cc b/gpu/config/software_rendering_list_json.cc
+index 6354a01..6d5e6b4 100644
+--- a/gpu/config/software_rendering_list_json.cc
++++ b/gpu/config/software_rendering_list_json.cc
+@@ -731,6 +731,7 @@ const char kSoftwareRenderingListJson[] = LONG_STRING_CONST(
+     },
+ )  // String split to avoid MSVC char limit.
+ LONG_STRING_CONST(
++#if !defined(OS_SAILFISH)
+     {
+       "id": 76,
+       "description": "WebGL is disabled on Android unless the GPU runs in a separate process or reset notification is supported",
+@@ -754,6 +755,7 @@ LONG_STRING_CONST(
+         "webgl"
+       ]
+     },
++#endif
+     {
+       "id": 78,
+       "description": "Accelerated video decode interferes with GPU sandbox on older Intel drivers",
+-- 
+2.4.10
+

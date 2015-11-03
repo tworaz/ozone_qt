@@ -1,0 +1,37 @@
+From a61e03c1a137b6a799e5b4d3ac00a77e92f250b6 Mon Sep 17 00:00:00 2001
+From: Piotr Tworek <tworaz666@gmail.com>
+Date: Tue, 15 Sep 2015 13:26:26 +0200
+Subject: [PATCH 3/7] Add workaround for broken glTexStorage2D on Jolla Tablet.
+
+---
+ gpu/config/gpu_driver_bug_list_json.cc | 14 ++++++++++++++
+ 1 file changed, 14 insertions(+)
+
+diff --git a/gpu/config/gpu_driver_bug_list_json.cc b/gpu/config/gpu_driver_bug_list_json.cc
+index 81ac1d8..aaa3900 100644
+--- a/gpu/config/gpu_driver_bug_list_json.cc
++++ b/gpu/config/gpu_driver_bug_list_json.cc
+@@ -1567,6 +1567,20 @@ LONG_STRING_CONST(
+         "max_copy_texture_chromium_size_1048576"
+       ]
+     }
++#if defined(OS_SAILFISH)
++    ,{
++      "id": 132,
++      "description": "glTextStorage2D broken on BayTrail",
++      "os": {
++        "type": "android"
++      },
++      "gl_vendor": "Intel",
++      "gl_renderer": "Intel.*BayTrail",
++      "features": [
++        "disable_texture_storage"
++      ]
++    }
++#endif
+   ]
+ }
+ 
+-- 
+2.4.10
+

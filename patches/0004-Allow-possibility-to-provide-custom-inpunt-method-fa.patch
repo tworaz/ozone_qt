@@ -1,0 +1,69 @@
+From 76aea470db9cc8e788b7f2a928c02b6698613069 Mon Sep 17 00:00:00 2001
+From: Piotr Tworek <tworaz666@gmail.com>
+Date: Tue, 28 Jul 2015 18:23:50 +0200
+Subject: [PATCH 4/7] Allow possibility to provide custom inpunt method factory
+ methods.
+
+---
+ ui/base/ime/input_method_factory.cc | 10 ++++++++++
+ ui/base/ime/input_method_factory.h  |  4 ++++
+ 2 files changed, 14 insertions(+)
+
+diff --git a/ui/base/ime/input_method_factory.cc b/ui/base/ime/input_method_factory.cc
+index b4aa3cd..04968f6 100644
+--- a/ui/base/ime/input_method_factory.cc
++++ b/ui/base/ime/input_method_factory.cc
+@@ -25,6 +25,8 @@ namespace {
+ 
+ ui::InputMethod* g_input_method_for_testing = nullptr;
+ 
++ui::InputMethodFactory* g_input_method_factory = nullptr;
++
+ bool g_input_method_set_for_testing = false;
+ 
+ bool g_create_input_method_called = false;
+@@ -45,6 +47,10 @@ scoped_ptr<InputMethod> CreateInputMethod(
+     return make_scoped_ptr(ret);
+   }
+ 
++  if (g_input_method_factory) {
++    return g_input_method_factory(delegate);
++  }
++
+   if (g_input_method_set_for_testing)
+     return make_scoped_ptr(new MockInputMethod(delegate));
+ 
+@@ -80,4 +86,8 @@ void SetUpInputMethodForTesting(InputMethod* input_method) {
+   g_input_method_for_testing = input_method;
+ }
+ 
++void SetUpInputMethodFactory(InputMethodFactory* factory) {
++  g_input_method_factory = factory;
++}
++
+ }  // namespace ui
+diff --git a/ui/base/ime/input_method_factory.h b/ui/base/ime/input_method_factory.h
+index 30132cb..f414fe2 100644
+--- a/ui/base/ime/input_method_factory.h
++++ b/ui/base/ime/input_method_factory.h
+@@ -19,6 +19,9 @@ class InputMethodDelegate;
+ 
+ class InputMethod;
+ 
++typedef scoped_ptr<InputMethod> (InputMethodFactory)(
++    internal::InputMethodDelegate*);
++
+ // Creates a new instance of InputMethod and returns it.
+ UI_BASE_IME_EXPORT scoped_ptr<InputMethod> CreateInputMethod(
+     internal::InputMethodDelegate* delegate,
+@@ -27,6 +30,7 @@ UI_BASE_IME_EXPORT scoped_ptr<InputMethod> CreateInputMethod(
+ // Makes CreateInputMethod return a MockInputMethod.
+ UI_BASE_IME_EXPORT void SetUpInputMethodFactoryForTesting();
+ UI_BASE_IME_EXPORT void SetUpInputMethodForTesting(InputMethod* input_method);
++UI_BASE_IME_EXPORT void SetUpInputMethodFactory(InputMethodFactory*);
+ 
+ }  // namespace ui;
+ 
+-- 
+2.4.10
+

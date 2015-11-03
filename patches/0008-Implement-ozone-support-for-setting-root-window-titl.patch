@@ -1,0 +1,85 @@
+From 13b82434be44118578e23458b5eba9644c7aba54 Mon Sep 17 00:00:00 2001
+From: Piotr Tworek <tworaz666@gmail.com>
+Date: Tue, 3 Nov 2015 20:46:27 +0100
+Subject: [PATCH 08/14] Implement ozone support for setting root window title.
+
+This ensures that setting WindowTreeHost's window title will actually
+call PlatformWindow::SetTitle.
+---
+ ui/aura/window_tree_host_platform.cc | 10 +++++++++-
+ ui/aura/window_tree_host_platform.h  |  5 +++++
+ 2 files changed, 14 insertions(+), 1 deletion(-)
+
+diff --git a/ui/aura/window_tree_host_platform.cc b/ui/aura/window_tree_host_platform.cc
+index 5c182a6..019a95b 100644
+--- a/ui/aura/window_tree_host_platform.cc
++++ b/ui/aura/window_tree_host_platform.cc
+@@ -5,6 +5,7 @@
+ #include "ui/aura/window_tree_host_platform.h"
+ 
+ #include "base/trace_event/trace_event.h"
++#include "ui/aura/window.h"
+ #include "ui/aura/window_event_dispatcher.h"
+ #include "ui/compositor/compositor.h"
+ #include "ui/events/event.h"
+@@ -48,7 +49,9 @@ WindowTreeHostPlatform::WindowTreeHostPlatform(const gfx::Rect& bounds)
+ WindowTreeHostPlatform::WindowTreeHostPlatform()
+     : widget_(gfx::kNullAcceleratedWidget),
+       current_cursor_(ui::kCursorNull),
+-      has_capture_(false) {}
++      has_capture_(false) {
++  window()->AddObserver(this);
++}
+ 
+ void WindowTreeHostPlatform::SetPlatformWindow(
+     scoped_ptr<ui::PlatformWindow> window) {
+@@ -58,6 +61,7 @@ void WindowTreeHostPlatform::SetPlatformWindow(
+ WindowTreeHostPlatform::~WindowTreeHostPlatform() {
+   DestroyCompositor();
+   DestroyDispatcher();
++  window()->RemoveObserver(this);
+ }
+ 
+ ui::EventSource* WindowTreeHostPlatform::GetEventSource() {
+@@ -187,4 +191,8 @@ void WindowTreeHostPlatform::OnActivationChanged(bool active) {
+     OnHostActivated();
+ }
+ 
++void WindowTreeHostPlatform::OnWindowTitleChanged(Window* window) {
++  window_->SetTitle(window->title());
++}
++
+ }  // namespace aura
+diff --git a/ui/aura/window_tree_host_platform.h b/ui/aura/window_tree_host_platform.h
+index 41870b9..e9ea503 100644
+--- a/ui/aura/window_tree_host_platform.h
++++ b/ui/aura/window_tree_host_platform.h
+@@ -8,6 +8,7 @@
+ #include "base/compiler_specific.h"
+ #include "base/memory/scoped_ptr.h"
+ #include "ui/aura/aura_export.h"
++#include "ui/aura/window_observer.h"
+ #include "ui/aura/window_tree_host.h"
+ #include "ui/gfx/native_widget_types.h"
+ #include "ui/platform_window/platform_window.h"
+@@ -19,6 +20,7 @@ namespace aura {
+ // that implement PlatformWindow.
+ class AURA_EXPORT WindowTreeHostPlatform
+     : public WindowTreeHost,
++      public WindowObserver,
+       public NON_EXPORTED_BASE(ui::PlatformWindowDelegate) {
+  public:
+   explicit WindowTreeHostPlatform(const gfx::Rect& bounds);
+@@ -57,6 +59,9 @@ class AURA_EXPORT WindowTreeHostPlatform
+   void OnAcceleratedWidgetDestroyed() override;
+   void OnActivationChanged(bool active) override;
+ 
++  // aura::WindowObserver:
++  void OnWindowTitleChanged(Window*) override;
++
+   gfx::AcceleratedWidget widget_;
+   scoped_ptr<ui::PlatformWindow> window_;
+   gfx::NativeCursor current_cursor_;
+-- 
+2.4.10
+

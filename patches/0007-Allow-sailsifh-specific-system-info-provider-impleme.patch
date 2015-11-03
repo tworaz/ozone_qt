@@ -1,0 +1,39 @@
+From bc0510b2ef30d4307b32ff64073e58d8a9ec3297 Mon Sep 17 00:00:00 2001
+From: Piotr Tworek <tworaz666@gmail.com>
+Date: Tue, 18 Aug 2015 14:02:30 +0200
+Subject: [PATCH 7/7] Allow sailsifh specific system info provider
+ implementation.
+
+Since we're interested in SailsifhOS being recognized as Android in some
+cases make room for custom base::SysInfo implementation.
+
+Signed-off-by: Piotr Tworek <tworaz666@gmail.com>
+---
+ base/sys_info_posix.cc | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/base/sys_info_posix.cc b/base/sys_info_posix.cc
+index 3d49bf9..7fb73db 100644
+--- a/base/sys_info_posix.cc
++++ b/base/sys_info_posix.cc
+@@ -96,7 +96,7 @@ int64 SysInfo::AmountOfFreeDiskSpace(const FilePath& path) {
+   return static_cast<int64>(stats.f_bavail) * stats.f_frsize;
+ }
+ 
+-#if !defined(OS_MACOSX) && !defined(OS_ANDROID)
++#if !defined(OS_MACOSX) && !defined(OS_ANDROID) && !defined(OS_SAILFISH)
+ // static
+ std::string SysInfo::OperatingSystemName() {
+   struct utsname info;
+@@ -108,7 +108,7 @@ std::string SysInfo::OperatingSystemName() {
+ }
+ #endif
+ 
+-#if !defined(OS_MACOSX) && !defined(OS_ANDROID)
++#if !defined(OS_MACOSX) && !defined(OS_ANDROID) && !defined(OS_SAILFISH)
+ // static
+ std::string SysInfo::OperatingSystemVersion() {
+   struct utsname info;
+-- 
+2.4.10
+

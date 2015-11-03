@@ -1,0 +1,73 @@
+From 22c9b67892f826ae1d51f014d400750539b49bd6 Mon Sep 17 00:00:00 2001
+From: Piotr Tworek <tworaz666@gmail.com>
+Date: Sat, 18 Jul 2015 23:59:49 +0200
+Subject: [PATCH] Make it possible to obtain wl_egl_window handle from QWindow.
+
+Signed-off-by: Piotr Tworek <tworaz666@gmail.com>
+---
+ src/client/qwaylandnativeinterface.cpp                           | 2 +-
+ src/client/qwaylandwindow_p.h                                    | 1 +
+ src/hardwareintegration/client/wayland-egl/qwaylandeglwindow.cpp | 9 +++++++++
+ src/hardwareintegration/client/wayland-egl/qwaylandeglwindow.h   | 1 +
+ 4 files changed, 12 insertions(+), 1 deletion(-)
+
+diff --git a/src/client/qwaylandnativeinterface.cpp b/src/client/qwaylandnativeinterface.cpp
+index 8170c39..3881616 100644
+--- a/src/client/qwaylandnativeinterface.cpp
++++ b/src/client/qwaylandnativeinterface.cpp
+@@ -85,7 +85,7 @@ void *QWaylandNativeInterface::nativeResourceForWindow(const QByteArray &resourc
+     if (lowerCaseResource == "egldisplay" && m_integration->clientBufferIntegration())
+         return m_integration->clientBufferIntegration()->nativeResource(QWaylandClientBufferIntegration::EglDisplay);
+ 
+-    return NULL;
++    return static_cast<QWaylandWindow *>(window->handle())->nativeResource(resourceString);
+ }
+ 
+ void *QWaylandNativeInterface::nativeResourceForScreen(const QByteArray &resourceString, QScreen *screen)
+diff --git a/src/client/qwaylandwindow_p.h b/src/client/qwaylandwindow_p.h
+index 1898c49..919f8a7 100644
+--- a/src/client/qwaylandwindow_p.h
++++ b/src/client/qwaylandwindow_p.h
+@@ -93,6 +93,7 @@ public:
+     ~QWaylandWindow();
+ 
+     virtual WindowType windowType() const = 0;
++    virtual void *nativeResource(const QByteArray &) { return Q_NULLPTR; }
+     WId winId() const;
+     void setVisible(bool visible);
+     void setParent(const QPlatformWindow *parent);
+diff --git a/src/hardwareintegration/client/wayland-egl/qwaylandeglwindow.cpp b/src/hardwareintegration/client/wayland-egl/qwaylandeglwindow.cpp
+index 2c3697b..b9dc98b 100644
+--- a/src/hardwareintegration/client/wayland-egl/qwaylandeglwindow.cpp
++++ b/src/hardwareintegration/client/wayland-egl/qwaylandeglwindow.cpp
+@@ -86,6 +86,15 @@ QWaylandWindow::WindowType QWaylandEglWindow::windowType() const
+     return QWaylandWindow::Egl;
+ }
+ 
++void *QWaylandEglWindow::nativeResource(const QByteArray &resourceString)
++{
++    QByteArray lowerCaseResource = resourceString.toLower();
++    if (lowerCaseResource == "wl_egl_window") {
++        return m_waylandEglWindow;
++    }
++    return Q_NULLPTR;
++}
++
+ void QWaylandEglWindow::setGeometry(const QRect &rect)
+ {
+     QWaylandWindow::setGeometry(rect);
+diff --git a/src/hardwareintegration/client/wayland-egl/qwaylandeglwindow.h b/src/hardwareintegration/client/wayland-egl/qwaylandeglwindow.h
+index 60722d1..445bc21 100644
+--- a/src/hardwareintegration/client/wayland-egl/qwaylandeglwindow.h
++++ b/src/hardwareintegration/client/wayland-egl/qwaylandeglwindow.h
+@@ -52,6 +52,7 @@ public:
+     QWaylandEglWindow(QWindow *window);
+     ~QWaylandEglWindow();
+     WindowType windowType() const;
++    void *nativeResource(const QByteArray &resourceString) Q_DECL_OVERRIDE;
+ 
+     void updateSurface(bool create);
+     virtual void setGeometry(const QRect &rect);
+-- 
+2.3.6
+
