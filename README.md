@@ -17,14 +17,14 @@ source tree.
 $ git am ozone_qt/patches/*.patch
 
 ## Building
-
+```
 $ ./build/gyp_chromuim -Duse_ozone=1 -Dozone_platform_qt=1 -Dtoolkit_views=0
 $ ninja -C out/Debug content_shell
-
+```
 ## Running
-
+```
 $ ./out/Debug/content_shell --no-sandbox --ozone-platfom=qt
-
+```
 ## Documents
 
 https://www.chromium.org/developers/design-documents/ozone
