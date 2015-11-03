@@ -1,4 +1,4 @@
-From 13b82434be44118578e23458b5eba9644c7aba54 Mon Sep 17 00:00:00 2001
+From c0864d42c8a3b0280c12e45dfd2b4fe2b6e87358 Mon Sep 17 00:00:00 2001
 From: Piotr Tworek <tworaz666@gmail.com>
 Date: Tue, 3 Nov 2015 20:46:27 +0100
 Subject: [PATCH 08/14] Implement ozone support for setting root window title.
@@ -11,7 +11,7 @@ call PlatformWindow::SetTitle.
  2 files changed, 14 insertions(+), 1 deletion(-)
 
 diff --git a/ui/aura/window_tree_host_platform.cc b/ui/aura/window_tree_host_platform.cc
-index 5c182a6..019a95b 100644
+index 5c182a6..71c1b12 100644
 --- a/ui/aura/window_tree_host_platform.cc
 +++ b/ui/aura/window_tree_host_platform.cc
 @@ -5,6 +5,7 @@
@@ -33,14 +33,14 @@ index 5c182a6..019a95b 100644
  
  void WindowTreeHostPlatform::SetPlatformWindow(
      scoped_ptr<ui::PlatformWindow> window) {
-@@ -58,6 +61,7 @@ void WindowTreeHostPlatform::SetPlatformWindow(
- WindowTreeHostPlatform::~WindowTreeHostPlatform() {
-   DestroyCompositor();
-   DestroyDispatcher();
-+  window()->RemoveObserver(this);
+@@ -56,6 +59,7 @@ void WindowTreeHostPlatform::SetPlatformWindow(
  }
  
- ui::EventSource* WindowTreeHostPlatform::GetEventSource() {
+ WindowTreeHostPlatform::~WindowTreeHostPlatform() {
++  window()->RemoveObserver(this);
+   DestroyCompositor();
+   DestroyDispatcher();
+ }
 @@ -187,4 +191,8 @@ void WindowTreeHostPlatform::OnActivationChanged(bool active) {
      OnHostActivated();
  }
