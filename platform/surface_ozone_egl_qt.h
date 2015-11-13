@@ -21,7 +21,7 @@ class SurfaceOzoneEGLQt : public SurfaceOzoneEGL {
   intptr_t GetNativeWindow() override;
   bool ResizeNativeWindow(const gfx::Size&) override;
   bool OnSwapBuffers() override;
-  bool OnSwapBuffersAsync(const SwapCompletionCallback& callback) override;
+  void OnSwapBuffersAsync(const SwapCompletionCallback& callback) override;
   scoped_ptr<gfx::VSyncProvider> CreateVSyncProvider() override;
 
  private:

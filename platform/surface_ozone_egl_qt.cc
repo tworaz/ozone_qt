@@ -54,10 +54,9 @@ bool SurfaceOzoneEGLQt::OnSwapBuffers() {
   return true;
 }
 
-bool SurfaceOzoneEGLQt::OnSwapBuffersAsync(
+void SurfaceOzoneEGLQt::OnSwapBuffersAsync(
     const SwapCompletionCallback& callback) {
   callback.Run(gfx::SwapResult::SWAP_ACK);
-  return true;
 }
 
 scoped_ptr<gfx::VSyncProvider> SurfaceOzoneEGLQt::CreateVSyncProvider() {
